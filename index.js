@@ -1,53 +1,73 @@
-/*var http = require('http'); //instancio la variable http donde voy a cargar el módulo http que tiene node (todos los atributos y métodos del módulo)
-var random = require('./moduloPrueba')
-http.createServer(function (req, res) {  //Uso el método de crear servidor del objeto http. En el parámetro tiene un callback que va a recibir una request y una respuesta
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end(random.caraOCruz());
-}).listen(8080);*/
-
-
 //const env = require("dotenv");
 const express = require("express");
-const app = express()    // Instancio el server
-const http = require("http").createServer(app);
-const dotenv = require('dotenv').config()
+const app = express();    // Instancio el server
+const http = require("http").createServer(app); //instancio la variable http donde voy a cargar el módulo http que tiene node (todos los atributos y métodos del módulo)
+const dotenv = require('dotenv').config();
+const cors = require("cors");
+const mongoose = require("mongoose");  //ORM de mongo, permite definir modelos
 const PORT = process.env.PORT  //Se define el puerto
+const uri = process.env.DB_URI
+
+const UserController = require("./controllers/user")
+const CharacterController = require("./controllers/character")
 
 
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
+    console.log("connected");
+}).catch((err) => console.log(err))
+app.use(cors())
+app.use(express.json());    //Para utilizar json y responder las consultas
 
-app.use(express.json());    //Para utilizar json
 
 // Acceso a db
-const { MongoClient, ServerApiVersion } = require('mongodb')
-const uri = process.env.DB_URL
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+const { MongoClient, ServerApiVersion } = require('mongodb');
+const { connected } = require("process");
+
+const client = new MongoClient(uri, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
+})
 client.connect(err => {
-    const collection = client.db("Fullstack_db").collection("characters");
+    //const usersCollection = client.db("Fullstack_db").collection("users");
     client.close();
 });
 
+const usersCollection = client.db("Fullstack_db").collection("users");
+const charactersCollection = client.db("Fullstack_db").collection("characters");
 
 
-http.listen(PORT, () => {       //Escucho el puerto
-    console.log(`listening to ${PORT}`);   //Console log para saber que puerto estoy escuchando
+http.listen(PORT, () => {                  // Escucho el puerto
+    console.log(`listening to ${PORT}`);   // Console log para saber que puerto estoy escuchando
 })
 
-
-app.get("/characters", async (req, res) => {
-    let { limit = 5, offset = 0 } = req.params;
-    console.log(limit);
+app.get("/users", async (req, res) => {
+    let limit = 5;
+    let offset = 0;
     try {
-        let result = await collection.find({}).skip(parseInt(offset)).limit(parseInt(limit)).toArray();
-        console.log(result);
-        res.json({ characters: result });
-    } catch (error) {
-        console.log(error);
-        let response = { 'status': 500, 'message': "Error de conexión." }
-        res.json({ response: response })
+        const results = await UserController.getAllUsers(limit, offset);
+        res.status(200).json(results);
+    } catch (err) {
+        console.log(err)
+        res.status(500).send(err)
     }
 })
 
+app.get("/characters", async (req, res) => {
+    let limit = req.query.limit;
+    let offset = req.query.offset;
 
-app.get("", async (req, res) => {
+    try {
+        const results = await CharacterController.getAllCharacters(limit, offset);
+        res.status(200).json(results);
+    } catch (err) {
+        console.log(err)
+        res.status(500).send(err)
+    }
+})
+
+app.get("/", async (req, res) => {
     res.json("Bienvenidos!");
 })
