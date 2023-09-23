@@ -7,6 +7,10 @@ const userSchema = new Schema({
         required: true,
         index: { unique: true, dropDups: true }
     },
+    nickname: {
+        type: String,
+        required: true
+    },
     name: {
         type: String,
         required: true

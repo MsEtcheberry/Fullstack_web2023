@@ -2,19 +2,23 @@ require("mongoose") //Para trabajar con los modelos predefinidos
 
 const User = require('../models/user');  //
 
-const addUser = async (name, lastname, email, isActive, password) => {
+const addUser = async (name, lastname, email, nickname, password) => {
     //Hace toda la lógica previa antes de tocar el modelo para persistir
-    let userExists = await User.findOne({ email: email });
 
-    if (!userExists) {
+    if (!name || !lastname || !email || !nickname || !password) {
+        return false
+    }
+    let user = await User.findOne({ email: email });
+    //let nicknameTaken = await User.findOne({ nickname: nickname })
+    if (!user) {
         const cryptoPass = require('crypto').createHash('sha256').update(password).digest('hex');
 
         const usr = new User(
             {
                 name: name,
-                lastname: lastname,
+                lastName: lastname,
+                nickname: nickname,
                 email: email,
-                isActive: isActive,
                 password: cryptoPass
             }
         );
@@ -29,7 +33,8 @@ const addUser = async (name, lastname, email, isActive, password) => {
 }
 
 const getAllUsers = async (limit, offset) => {
-    const users = await User.find({}).limit(limit).skip(offset);
+    //Muestra SOLO usuariosa activos
+    const users = await User.find({ isActive: true }).limit(limit).skip(offset);
     return users;
 }
 
@@ -47,7 +52,9 @@ const editRoles = async (roles, id) => {
 }
 
 const deleteUser = async (id) => {
-
+    //Elimina el documento en mongoDB
+    const user = await User.findByIdAndRemove(id);
+    return user;
 }
 
 module.exports = { addUser, getAllUsers, getUser, editRoles, editUser, deleteUser }
