@@ -13,11 +13,7 @@ const UserController = require("./controllers/user");
 const CharacterController = require("./controllers/character");
 const AuthController = require('./controllers/auth');
 const ClothingController = require('./controllers/clothing');
-
-
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
-    console.log("connected");
-}).catch((err) => console.log(err));
+const User = require("./models/user");
 
 app.use(cors());
 app.use(express.json());    //Para utilizar json y responder las consultas
@@ -26,7 +22,14 @@ app.use(express.json());    //Para utilizar json y responder las consultas
 // Acceso a db
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const { connected } = require("process");
-const User = require("./models/user");
+
+
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
+    console.log("connected");
+}).catch((err) => console.log(err));
+
+
+
 
 const client = new MongoClient(uri, {
     serverApi: {
@@ -36,12 +39,8 @@ const client = new MongoClient(uri, {
     }
 })
 client.connect(err => {
-    //const usersCollection = client.db("Fullstack_db").collection("users");
-    //const usersCollection = client.db("Fullstack_db").collection("users");
-    //const charactersCollection = client.db("Fullstack_db").collection("characters");
     client.close();
 });
-
 
 
 http.listen(PORT, () => {                  // Escucho el puerto
@@ -121,7 +120,7 @@ app.get("/users/:id/characters", async (req, res) => {
 })
 
 //POST
-app.post("/users", async (req, res) => {
+app.post("/users", middleware.verify, async (req, res) => {
     let name = req.body.name;
     let lastname = req.body.lastname;
     let email = req.body.email;

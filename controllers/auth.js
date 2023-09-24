@@ -1,9 +1,10 @@
 require('mongoose');
+require('dotenv').config()
 const jwt = require('jsonwebtoken'); //Herramienta wue gestiona tokens.
 
 const User = require('../models/user');
 
-const login = async = async (email, password) => {
+const login = async (email, password) => {
     const cryptoPass = require('crypto')
         .createHash('sha256')
         .update(password)
@@ -12,7 +13,7 @@ const login = async = async (email, password) => {
 
     if (result) { //Si existe
         jwt.sign('payload', 'secret_key')
-        const token = jwt.sign({ email: email }, 'secret_key');
+        const token = jwt.sign({ email: email }, process.env.TOKEN_KEY, { expiresIn: "1h" });
 
         return token;
     }
