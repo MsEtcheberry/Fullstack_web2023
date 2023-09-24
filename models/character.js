@@ -1,12 +1,30 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const characterSchema = new Schema({
-
-
-    name: {
+    displayName: {
         type: String,
         required: true
-    }
+    },
+    userId: {
+        type: String,
+        required: true
+    },
+    baseCharacter: {
+        type: Object,
+        required: true
+    },
+    upperClothing: {
+        type: Object,
+        required: true
+    },
+    bottomClothing: {
+        type: Object,
+        required: true
+    },
+    shoes: {
+        type: Object,
+        required: true
+    },
 }, { timestamps: true }).set('toJSON', { //Esta parte es opcional
     transform: (document, object) => {
         object.id = document.id;
