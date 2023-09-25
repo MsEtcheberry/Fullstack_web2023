@@ -132,7 +132,7 @@ app.post("/users", async (req, res) => {
         if (result) {
             res.status(201).send("¡El usuario fue creado correctamente!");
         } else {
-            res.status(409).send("Ya existe un usuario con las credenciales ingresadas");
+            res.status(409).send("No puedo crearse el usuario (Datos faltantes o ya hay un usuario con el email indicado)");
         }
     } catch (err) {
         res.status(500).send("Error al crear el usuario. Intente luego");
@@ -228,7 +228,7 @@ app.get("/clothing", async (req, res) => {
     let limit = req.query.limit;
     let offset = req.query.offset;
     try {
-        const results = await ClothingController.getAllClothing();
+        const results = await ClothingController.getAllClothing(limit, offset);
         res.status(200).json(results)
     } catch (err) {
         res.status(500).send("Hubo un error al recuperar la vestimenta. Intente luego.")
@@ -241,7 +241,7 @@ app.get("/clothing/:type", async (req, res) => {
     let type = req.params.type;
 
     try {
-        const results = await ClothingController.getClothingByType(type);
+        const results = await ClothingController.getClothingByType(type, limit, offset);
         res.status(200).json(results)
     } catch (err) {
         res.status(500).send("Hubo un error al recuperar la vestimenta. Intente luego.")
@@ -258,7 +258,7 @@ app.post("/auth/login", async (req, res) => {
     try {
         const result = await AuthController.login(email, password);
         if (result) {
-            res.status(200).json(result);
+            res.status(200).json({ token: result });
         } else {
             res.status(401).send("Credenciales incorrectas")
         }

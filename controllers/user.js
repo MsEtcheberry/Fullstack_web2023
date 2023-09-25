@@ -33,7 +33,7 @@ const addUser = async (name, lastname, email, nickname, password) => {
 }
 
 const getAllUsers = async (limit, offset) => {
-    //Muestra SOLO usuariosa activos
+    //Muestra SOLO usuarios activos
     const users = await User.find({ isActive: true }).limit(limit).skip(offset);
     return users;
 }
