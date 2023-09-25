@@ -372,3 +372,20 @@ Request Body:
        
 }
 ```
+
+#### DELETE('/users/:id')
+
+-Requiere pasar el id del usuario a borrar mediante la URL. Elimina al registro de la base de datos
+
+-Respuestas:
+
+*200 (Success). El usuario fue borrado correctamente. 
+        
+*404 Error No se encontró el usuario a eliminar.
+
+*500 Error interno del servidor.
+
+Ejemplo:
+
+Ruta: ```http://localhost:<PORT>/users/6511f468ca3cdb428f7a73e4```
+
