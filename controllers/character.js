@@ -28,11 +28,6 @@ const addCharacter = async (userId, displayName, baseCharacter, upperClothing, b
     }
 }
 
-/*const getAllCharacters = async (limit, offset) => {
-    const characters = await Character.find({}).limit(limit).skip(offset);
-    return characters;
-}*/
-
 const getCharactersForUser = async (userId, limit, offset) => {
     if (!userId || limit, offset) {
         return false;
@@ -56,4 +51,9 @@ const deleteCharacter = async (id) => {//Elimina el personaje de la BD
     return character
 }
 
-module.exports = { addCharacter, getCharactersForUser, getCharacter, getLatestCharacters, deleteCharacter }
+const updateCharacter = async (character) => {
+    const updatedCharacter = await Character.findByIdAndUpdate(character._id, character, { new: true })
+    return updatedCharacter;
+}
+
+module.exports = { addCharacter, getCharactersForUser, getCharacter, getLatestCharacters, deleteCharacter, updateCharacter }

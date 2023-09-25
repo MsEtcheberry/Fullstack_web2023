@@ -1,4 +1,3 @@
-//const env = require("dotenv");
 const express = require("express");
 const app = express();    // Instancio el server
 const http = require("http").createServer(app); //instancio la variable http donde voy a cargar el módulo http que tiene node (todos los atributos y métodos del módulo)
@@ -6,14 +5,15 @@ const dotenv = require('dotenv').config();
 const cors = require("cors");
 const mongoose = require("mongoose");  //ORM de mongo, permite definir modelos
 const middleware = require('./middleware/auth-middleware');
+//Variables .env
 const PORT = process.env.PORT  //Se define el puerto
 const uri = process.env.DB_URI
 
+//Controladores
 const UserController = require("./controllers/user");
 const CharacterController = require("./controllers/character");
 const AuthController = require('./controllers/auth');
 const ClothingController = require('./controllers/clothing');
-const User = require("./models/user");
 
 app.use(cors());
 app.use(express.json());    //Para utilizar json y responder las consultas
@@ -62,7 +62,6 @@ app.get("/users", async (req, res) => {
         const results = await UserController.getAllUsers(limit, offset);
         res.status(200).json(results);
     } catch (err) {
-        console.log(err);
         res.status(500).send(err);
     }
 })
@@ -85,27 +84,28 @@ app.get("/users/:id", async (req, res) => {
 app.get("/users/:id/characters", async (req, res) => {
     let limit = req.query.limit;
     let offset = req.query.offset;
-    let userId = req.params.id
+    let userId = req.params.id;
     try {
         const user = await UserController.getUser(userId);
         if (!user) {
-            res.status(404).send("Perdón. No se encontró el usuario indicado.")
+            res.status(404).send("Perdón. No se encontró el usuario indicado.");
         }
         const characters = await CharacterController.getCharactersForUser(userId, limit, offset);
         if (characters) {
-            res.status(200).json(characters)
+            res.status(200).json(characters);
         } else {
-            res.status(404).send("No se encontró el usuario indicado.")
+            res.status(404).send("No se encontró el usuario indicado.");
         }
     } catch (err) {
-        res.status(500).send("Hubo un error al intentar buscar los personajes. Intente luego.")
+        res.status(500).send("Hubo un error al intentar buscar los personajes. Intente luego.");
     }
 
 })
 
 //DELETE (Borra el registro de la base)
 app.delete("/users/:id", middleware.verify, async (req, res) => {
-    let id = req.params.id
+
+    let id = req.params.id;
 
     try {
         const user = await UserController.deleteUser(id)
@@ -115,7 +115,6 @@ app.delete("/users/:id", middleware.verify, async (req, res) => {
             res.status(404).send("El usuario no fue encontrado, por lo que no pudo borrarse.")
         }
     } catch (err) {
-        console.log(err)
         res.status(500).send("Hubo un error al intentar eliminar el usuario, intente luego.")
     }
 })
@@ -136,7 +135,6 @@ app.post("/users", async (req, res) => {
             res.status(409).send("Ya existe un usuario con las credenciales ingresadas");
         }
     } catch (err) {
-        console.log(err)
         res.status(500).send("Error al crear el usuario. Intente luego");
     }
 
@@ -166,7 +164,6 @@ app.get("/characters", async (req, res) => {
         const results = await CharacterController.getLatestCharacters();
         res.status(200).json(results);
     } catch (err) {
-        console.log(err);
         res.status(500).send("Hubo un error al intentar recuperar los personajes. Intente luego.");
     }
 })
@@ -203,8 +200,24 @@ app.post("/characters", middleware.verify, async (req, res) => {
             res.status(409).send("Error al intentar crear el personaje.")
         }
     } catch (err) {
-        console.log(err)
         res.status(500).send("Hubo un error al intentar crear el personaje. Intente luego.")
+    }
+})
+
+//PUT
+app.put("/characters/:id", middleware.verify, async (req, res) => {
+    const character = { _id: req.params.id, userId: req.body.userId, displayName: req.body.displayName, baseCharacter: req.body.baseCharacter, upperClothing: req.body.upperClothing, bottomClothing: req.body.bottomClothing, shoes: req.body.shoes }
+
+    try {
+        const updatedCharacter = await CharacterController.updateCharacter(character);
+        if (updatedCharacter) {
+            res.status(200).json(updatedCharacter);
+        } else {
+            res.status(404).send("El personaje que se intentó modificar no fue encontrado");
+        }
+    } catch (err) {
+        console.log(err)
+        res.status(500).send("Hubo un error al intentar modificar el personaje. Intente luego.")
     }
 })
 
@@ -250,7 +263,6 @@ app.post("/auth/login", async (req, res) => {
             res.status(401).send("Credenciales incorrectas")
         }
     } catch (err) {
-        console.log(err)
         res.status(500).send("Error");
     }
 })
