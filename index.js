@@ -24,12 +24,10 @@ const { MongoClient, ServerApiVersion } = require('mongodb');
 const { connected } = require("process");
 
 
+//Conexión con MongoDB/Mongoose
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
     console.log("connected");
 }).catch((err) => console.log(err));
-
-
-
 
 const client = new MongoClient(uri, {
     serverApi: {
@@ -39,15 +37,17 @@ const client = new MongoClient(uri, {
     }
 })
 client.connect(err => {
+
     client.close();
 });
 
-
-http.listen(PORT, () => {                  // Escucho el puerto
+//Escuchar puerto
+http.listen(PORT, () => {
     console.log(`listening to ${PORT}`);   // Console log para saber que puerto estoy escuchando
 })
 
 
+//Endpoint General
 app.get("/", async (req, res) => {
     res.json("Bienvenidos!");
 })
@@ -82,7 +82,29 @@ app.get("/users/:id", async (req, res) => {
     }
 })
 
-app.delete("/users/:id", async (req, res) => {
+app.get("/users/:id/characters", async (req, res) => {
+    let limit = req.query.limit;
+    let offset = req.query.offset;
+    let userId = req.params.id
+    try {
+        const user = await UserController.getUser(userId);
+        if (!user) {
+            res.status(404).send("Perdón. No se encontró el usuario indicado.")
+        }
+        const characters = await CharacterController.getCharactersForUser(userId, limit, offset);
+        if (characters) {
+            res.status(200).json(characters)
+        } else {
+            res.status(404).send("No se encontró el usuario indicado.")
+        }
+    } catch (err) {
+        res.status(500).send("Hubo un error al intentar buscar los personajes. Intente luego.")
+    }
+
+})
+
+//DELETE (Borra el registro de la base)
+app.delete("/users/:id", middleware.verify, async (req, res) => {
     let id = req.params.id
 
     try {
@@ -98,29 +120,8 @@ app.delete("/users/:id", async (req, res) => {
     }
 })
 
-app.get("/users/:id/characters", async (req, res) => {
-    let userId = req.params.id
-
-    try {
-        const user = await UserController.getUser(userId);
-        if (!user) {
-            res.status(404).send("Perdón. No se encontró el usuario indicado.")
-        }
-        const characters = await CharacterController.getLatestCharactersForUser(userId);
-        if (characters) {
-            res.status(200).json(characters)
-        } else {
-            res.status(404).send("No se encontró el usuario indicado.")
-        }
-    } catch (err) {
-        console.log(err)
-        res.status(500).send("Hubo un error al intentar buscar los personajes. Intente luego.")
-    }
-
-})
-
 //POST
-app.post("/users", middleware.verify, async (req, res) => {
+app.post("/users", async (req, res) => {
     let name = req.body.name;
     let lastname = req.body.lastname;
     let email = req.body.email;
@@ -141,14 +142,28 @@ app.post("/users", middleware.verify, async (req, res) => {
 
 })
 
+//PUT
+app.put("/users/:id", middleware.verify, async (req, res) => {
+    const user = { _id: req.params.id, name: req.body.name, lastname: req.body.lastname, email: req.body.email, nickname: req.body.nickname }
+
+    try {
+        const user = await UserController.editUser(user);
+        if (user) {
+            res.status(200).json(user);
+        } else {
+            res.status(404).send("El usuario a modificar no fue encontrado");
+        }
+    } catch (err) {
+        res.status(500).send("Hubo un error al intentar modificar el usuario. Intente luego.")
+    }
+})
+
 
 //Endpoints de Personajes
-//Get
+//GET
 app.get("/characters", async (req, res) => {
-    let limit = req.query.limit;
-    let offset = req.query.offset;
     try {
-        const results = await CharacterController.getAllCharacters(limit, offset);
+        const results = await CharacterController.getLatestCharacters();
         res.status(200).json(results);
     } catch (err) {
         console.log(err);
@@ -171,8 +186,8 @@ app.get("/characters/:id", async (req, res) => {
     }
 })
 
-//Post
-app.post("/characters", async (req, res) => {
+//POST
+app.post("/characters", middleware.verify, async (req, res) => {
     let userId = req.body.userId;
     let displayname = req.body.displayName;
     let baseCharacter = req.body.baseCharacter
@@ -185,7 +200,7 @@ app.post("/characters", async (req, res) => {
         if (character) {
             res.status(201).send("¡El personaje fue creado con éxito!")
         } else {
-            res.status(409).send("Error al intentar cre<r el personaje.")
+            res.status(409).send("Error al intentar crear el personaje.")
         }
     } catch (err) {
         console.log(err)
@@ -193,7 +208,9 @@ app.post("/characters", async (req, res) => {
     }
 })
 
+
 //Endpoints de Vestimentas
+//GET
 app.get("/clothing", async (req, res) => {
     let limit = req.query.limit;
     let offset = req.query.offset;
@@ -218,7 +235,9 @@ app.get("/clothing/:type", async (req, res) => {
     }
 })
 
+
 //Endpoints de login
+//POST
 app.post("/auth/login", async (req, res) => {
 
     const email = req.body.email;

@@ -33,7 +33,7 @@ const userSchema = new Schema({
         type: String,
         required: true
     }
-}, { timestamps: true }).set('toJSON', { //Esta parte es opcional
+}, { timestamps: true }).set('toJSON', {
     transform: (document, object) => {
         object.id = document.id;
         delete object._id;

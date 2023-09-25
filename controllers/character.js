@@ -1,6 +1,6 @@
-require("mongoose") //Para trabajar con los modelos predefinidos
-
-const Character = require('../models/character');  //
+require("mongoose")
+const Character = require('../models/character');
+const User = require("../models/user");
 
 
 const addCharacter = async (userId, displayName, baseCharacter, upperClothing, bottomClothing, shoes) => {
@@ -28,17 +28,22 @@ const addCharacter = async (userId, displayName, baseCharacter, upperClothing, b
     }
 }
 
-const getAllCharacters = async (limit, offset) => {
+/*const getAllCharacters = async (limit, offset) => {
     const characters = await Character.find({}).limit(limit).skip(offset);
     return characters;
-}
+}*/
 
-const getLatestCharactersForUser = async (userId) => {
-    if (!userId) {
+const getCharactersForUser = async (userId, limit, offset) => {
+    if (!userId || limit, offset) {
         return false;
     }
-    const characters = await Character.find({ userId: userId }).limit(5).sort({ created: "descending" })
+    const characters = await Character.find({ userId: userId }).sort({ created: "descending" }).limit(limit).skip(offset)
     return characters
+}
+
+const getLatestCharacters = async () => {
+    const characters = await Character.find().limit(5).sort({ createdAt: "descending" });
+    return characters;
 }
 
 const getCharacter = async (id) => {
@@ -46,17 +51,9 @@ const getCharacter = async (id) => {
     return character
 }
 
-/*
-const editUser = async (user) => {
-    const result = await User.findByIdAndUpdate(user._id,user,{new:true});
+const deleteCharacter = async (id) => {//Elimina el personaje de la BD
+    const character = await User.findByIdAndRemove(id);
+    return character
 }
 
-const editRoles = async (roles,id) => {
-
-}
-
-const deleteUser = async (id) => {
-
-}
-*/
-module.exports = { getAllCharacters, addCharacter, getLatestCharactersForUser, getCharacter }
+module.exports = { addCharacter, getCharactersForUser, getCharacter, getLatestCharacters, deleteCharacter }

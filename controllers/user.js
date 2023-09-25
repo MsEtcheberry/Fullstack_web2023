@@ -44,11 +44,8 @@ const getUser = async (id) => {
 }
 
 const editUser = async (user) => {
-    const result = await User.findByIdAndUpdate(user._id, user, { new: true });
-}
-
-const editRoles = async (roles, id) => {
-
+    const updatedUser = await User.findByIdAndUpdate(user._id, user, { new: true });
+    return updatedUser;
 }
 
 const deleteUser = async (id) => {
@@ -57,4 +54,4 @@ const deleteUser = async (id) => {
     return user;
 }
 
-module.exports = { addUser, getAllUsers, getUser, editRoles, editUser, deleteUser }
+module.exports = { addUser, getAllUsers, getUser, editUser, deleteUser }
