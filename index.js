@@ -145,13 +145,14 @@ app.put("/users/:id", middleware.verify, async (req, res) => {
     const user = { _id: req.params.id, name: req.body.name, lastname: req.body.lastname, email: req.body.email, nickname: req.body.nickname }
 
     try {
-        const user = await UserController.editUser(user);
-        if (user) {
-            res.status(200).json(user);
+        const updatedUser = await UserController.editUser(user);
+        if (updatedUser) {
+            res.status(200).json(updatedUser);
         } else {
             res.status(404).send("El usuario a modificar no fue encontrado");
         }
     } catch (err) {
+        console.log(err)
         res.status(500).send("Hubo un error al intentar modificar el usuario. Intente luego.")
     }
 })
