@@ -4,6 +4,7 @@ const User = require("../models/user");
 
 
 const addCharacter = async (userId, displayName, baseCharacter, upperClothing, bottomClothing, shoes) => {
+    console.log(userId, displayName, baseCharacter, upperClothing, bottomClothing, shoes)
     if (!userId || !displayName || !baseCharacter || !upperClothing || !bottomClothing || !shoes) {
         return false;
     }
@@ -29,7 +30,7 @@ const addCharacter = async (userId, displayName, baseCharacter, upperClothing, b
 }
 
 const getCharactersForUser = async (userId, limit, offset) => {
-    if (!userId || limit, offset) {
+    if (!userId) {
         return false;
     }
     const characters = await Character.find({ userId: userId }).sort({ created: "descending" }).limit(limit).skip(offset)

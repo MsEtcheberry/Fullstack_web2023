@@ -49,7 +49,7 @@ http.listen(PORT, () => {
 
 //Endpoint General
 app.get("/", async (req, res) => {
-    res.json("Bienvenidos!");
+    res.json({ message: "Bienvenidos!" });
 })
 
 //Endpoints de usuarios
@@ -74,10 +74,10 @@ app.get("/users/:id", async (req, res) => {
         if (user) {
             res.status(200).json(user);
         } else {
-            res.status(404).send("No se encontró el usuario indicado");
+            res.status(404).send({ message: "No se encontró el usuario indicado" });
         }
     } catch (err) {
-        res.status(500).send("Error al intentar traer el usuario. Intente luego");
+        res.status(500).send({ message: "Error al intentar traer el usuario. Intente luego" });
     }
 })
 
@@ -88,16 +88,16 @@ app.get("/users/:id/characters", async (req, res) => {
     try {
         const user = await UserController.getUser(userId);
         if (!user) {
-            res.status(404).send("Perdón. No se encontró el usuario indicado.");
+            res.status(404).send({ message: "Perdón. No se encontró el usuario indicado." });
         }
         const characters = await CharacterController.getCharactersForUser(userId, limit, offset);
         if (characters) {
             res.status(200).json(characters);
         } else {
-            res.status(404).send("No se encontró el usuario indicado.");
+            res.status(404).send({ message: "No se encontró el usuario indicado." });
         }
     } catch (err) {
-        res.status(500).send("Hubo un error al intentar buscar los personajes. Intente luego.");
+        res.status(500).send({ message: "Hubo un error al intentar buscar los personajes. Intente luego." });
     }
 
 })
@@ -130,12 +130,12 @@ app.post("/users", async (req, res) => {
     try {
         const result = await UserController.addUser(name, lastname, email, nickname, password);
         if (result) {
-            res.status(201).send("¡El usuario fue creado correctamente!");
+            res.status(201).send({ message: "¡El usuario fue creado correctamente!" });
         } else {
-            res.status(409).send("No puedo crearse el usuario (Datos faltantes o ya hay un usuario con el email indicado)");
+            res.status(409).send({ message: "No puedo crearse el usuario (Datos faltantes o ya hay un usuario con el email indicado)" });
         }
     } catch (err) {
-        res.status(500).send("Error al crear el usuario. Intente luego");
+        res.status(500).send({ message: "Error al crear el usuario. Intente luego" });
     }
 
 })
@@ -149,11 +149,10 @@ app.put("/users/:id", middleware.verify, async (req, res) => {
         if (updatedUser) {
             res.status(200).json(updatedUser);
         } else {
-            res.status(404).send("El usuario a modificar no fue encontrado");
+            res.status(404).send({ message: "El usuario a modificar no fue encontrado" });
         }
     } catch (err) {
-        console.log(err)
-        res.status(500).send("Hubo un error al intentar modificar el usuario. Intente luego.")
+        res.status(500).send({ message: "Hubo un error al intentar modificar el usuario. Intente luego." })
     }
 })
 
@@ -165,7 +164,7 @@ app.get("/characters", async (req, res) => {
         const results = await CharacterController.getLatestCharacters();
         res.status(200).json(results);
     } catch (err) {
-        res.status(500).send("Hubo un error al intentar recuperar los personajes. Intente luego.");
+        res.status(500).send({ message: "Hubo un error al intentar recuperar los personajes. Intente luego." });
     }
 })
 
@@ -177,10 +176,10 @@ app.get("/characters/:id", async (req, res) => {
         if (character) {
             res.status(200).json(character);
         } else {
-            res.status(404).send("No se encontró el personaje solicitado.");
+            res.status(404).send({ message: "No se encontró el personaje solicitado." });
         }
     } catch (err) {
-        res.status(500).send("Hubo un error al intentar traer el personaje. Intente luego.");
+        res.status(500).send({ message: "Hubo un error al intentar traer el personaje. Intente luego." });
     }
 })
 
@@ -196,12 +195,12 @@ app.post("/characters", middleware.verify, async (req, res) => {
     try {
         const character = await CharacterController.addCharacter(userId, displayname, baseCharacter, upperClothing, bottomClothing, shoes)
         if (character) {
-            res.status(201).send("¡El personaje fue creado con éxito!")
+            res.status(201).send({ message: "¡El personaje fue creado con éxito!" })
         } else {
-            res.status(409).send("Error al intentar crear el personaje.")
+            res.status(409).send({ message: "Error al intentar crear el personaje." })
         }
     } catch (err) {
-        res.status(500).send("Hubo un error al intentar crear el personaje. Intente luego.")
+        res.status(500).send({ message: "Hubo un error al intentar crear el personaje. Intente luego." })
     }
 })
 
@@ -214,11 +213,10 @@ app.put("/characters/:id", middleware.verify, async (req, res) => {
         if (updatedCharacter) {
             res.status(200).json(updatedCharacter);
         } else {
-            res.status(404).send("El personaje que se intentó modificar no fue encontrado");
+            res.status(404).send({ message: "El personaje que se intentó modificar no fue encontrado" });
         }
     } catch (err) {
-        console.log(err)
-        res.status(500).send("Hubo un error al intentar modificar el personaje. Intente luego.")
+        res.status(500).send({ message: "Hubo un error al intentar modificar el personaje. Intente luego." })
     }
 })
 
@@ -232,7 +230,7 @@ app.get("/clothing", async (req, res) => {
         const results = await ClothingController.getAllClothing(limit, offset);
         res.status(200).json(results)
     } catch (err) {
-        res.status(500).send("Hubo un error al recuperar la vestimenta. Intente luego.")
+        res.status(500).send({ message: "Hubo un error al recuperar la vestimenta. Intente luego." })
     }
 })
 
@@ -245,10 +243,24 @@ app.get("/clothing/:type", async (req, res) => {
         const results = await ClothingController.getClothingByType(type, limit, offset);
         res.status(200).json(results)
     } catch (err) {
-        res.status(500).send("Hubo un error al recuperar la vestimenta. Intente luego.")
+        res.status(500).send({ message: "Hubo un error al recuperar la vestimenta. Intente luego." })
     }
 })
 
+app.get("/clothing/:id", async (req, res) => {
+    let id = req.params.id;
+
+    try {
+        const clothing = await ClothingController.getClothing(id);
+        if (clothing) {
+            res.status(200).json(clothing);
+        } else {
+            res.status(404).send({ message: "No se encontró la vestimenta solicitada." });
+        }
+    } catch (err) {
+        res.status(500).send({ message: "Hubo un error al intentar traer la vestimenta. Intente luego." });
+    }
+})
 
 //Endpoints de login
 //POST
@@ -259,11 +271,11 @@ app.post("/auth/login", async (req, res) => {
     try {
         const result = await AuthController.login(email, password);
         if (result) {
-            res.status(200).json({ token: result });
+            res.status(200).json({ data: result });
         } else {
-            res.status(401).send("Credenciales incorrectas")
+            res.status(401).send({ message: "Credenciales incorrectas" })
         }
     } catch (err) {
-        res.status(500).send("Error");
+        res.status(500).send({ message: "Error interno del servidor" });
     }
 })

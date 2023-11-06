@@ -15,7 +15,7 @@ const login = async (email, password) => {
         jwt.sign('payload', 'secret_key')
         const token = jwt.sign({ email: email }, process.env.TOKEN_KEY, { expiresIn: "1h" });
 
-        return token;
+        return { token: token, userId: result.id };
     }
     return null;
 }

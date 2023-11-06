@@ -11,7 +11,7 @@ const verify = (req, res, next) => { //Usar token pasado mediante el endpoint /a
         const decode = jwt.verify(token, process.env.TOKEN_KEY);
         next();
     } catch (err) {
-        res.status(401).send('No autorizado')
+        res.status(401).send({ message: 'No autorizado' })
     }
 }
 
